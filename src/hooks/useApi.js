@@ -197,5 +197,10 @@ export const api = {
   deleteGallery: (id, token) => apiCall(`${API_BASE}/gallery/${id}`, {
     method: 'DELETE',
     headers: getHeaders(token)
+  }),
+  updateGallery: (id, formData, token) => apiCall(`${API_BASE}/gallery/${id}`, {
+    method: 'PUT',
+    headers: getHeaders(token),
+    body: formData
   })
 };

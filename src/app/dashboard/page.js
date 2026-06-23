@@ -76,7 +76,7 @@ export default function AdminDashboard() {
     addMessage,
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState("overview"); // overview, passports, chat, sliders, circulars, packages, blogs, reviews
+  const [activeTab, setActiveTab] = useState("overview"); // overview, passports, chat, sliders, circulars, packages, blogs, reviews, appointments, gallery
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -89,6 +89,7 @@ export default function AdminDashboard() {
   const [isSubmittingCircular, setIsSubmittingCircular] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isSubmittingBlog, setIsSubmittingBlog] = useState(false);
+  const [isSubmittingGallery, setIsSubmittingGallery] = useState(false);
   const [isSubmittingPassport, setIsSubmittingPassport] = useState(false);
 
   // Search passport state
@@ -137,6 +138,11 @@ export default function AdminDashboard() {
   const [blogContent, setBlogContent] = useState("");
   const [blogAuthor, setBlogAuthor] = useState("");
   const [blogImageFile, setBlogImageFile] = useState(null);
+
+  // Form gallery
+  const [galleryTitle, setGalleryTitle] = useState("");
+  const [galleryDescription, setGalleryDescription] = useState("");
+  const [galleryImageFile, setGalleryImageFile] = useState(null);
 
   // Form passports
   const [holderName, setHolderName] = useState("");
@@ -225,6 +231,12 @@ export default function AdminDashboard() {
   const { data: appointments = [], refetch: refetchAppointments } = useQuery({
     queryKey: ["adminAppointments"],
     queryFn: () => api.getAppointments(token),
+    enabled: !!user && user.role === "admin",
+  });
+
+  const { data: galleryItems = [], refetch: refetchGallery } = useQuery({
+    queryKey: ["adminGallery"],
+    queryFn: api.getGallery,
     enabled: !!user && user.role === "admin",
   });
 
@@ -457,6 +469,9 @@ export default function AdminDashboard() {
       } else if (type === "blog") {
         await api.deleteBlog(id, token);
         refetchBlogs();
+      } else if (type === "gallery") {
+        await api.deleteGallery(id, token);
+        refetchGallery();
       }
     } catch (err) {
       alert("মুছে ফেলা ব্যর্থ হয়েছে।");
@@ -634,6 +649,33 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleGallerySubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmittingGallery(true);
+    const formData = new FormData();
+    formData.append("title", galleryTitle);
+    formData.append("description", galleryDescription);
+    if (galleryImageFile) {
+      formData.append("file", galleryImageFile);
+    }
+
+    try {
+      if (editingId) {
+        await api.updateGallery(editingId, formData, token);
+      } else {
+        if (!galleryImageFile)
+          return alert("গ্যালারির জন্য একটি ছবি আপলোড করা আবশ্যক।");
+        await api.addGallery(formData, token);
+      }
+      refetchGallery();
+      closeModal();
+    } catch (err) {
+      alert("গ্যালারি সেভ করা যায়নি।");
+    } finally {
+      setIsSubmittingGallery(false);
+    }
+  };
+
   const handlePassportSubmit = async (e) => {
     e.preventDefault();
     if (!passportFile && !editingId) {
@@ -717,6 +759,9 @@ export default function AdminDashboard() {
     setBlogContent("");
     setBlogAuthor("");
     setBlogImageFile(null);
+    setGalleryTitle("");
+    setGalleryDescription("");
+    setGalleryImageFile(null);
     setHolderName("");
     setPassportNumber("");
     setSubmissionDate("");
@@ -746,6 +791,9 @@ export default function AdminDashboard() {
       setCircCat(item.jobCategory);
       setCircSalary(item.salaryRange);
       setCircReqs(item.requirements?.join("\n") || "");
+    } else if (type === "gallery") {
+      setGalleryTitle(item.title);
+      setGalleryDescription(item.description || "");
     }
   };
 
@@ -902,6 +950,7 @@ export default function AdminDashboard() {
               { id: "blogs", name: "ব্লগ পোস্ট", icon: FileText },
               { id: "reviews", name: "গ্রাহক রিভিউ", icon: Star },
               { id: "appointment", name: "অ্যাপয়েন্টমেন্ট", icon: ClipboardClock },
+              { id: "gallery", name: "ফটো গ্যালারি", icon: Image },
             ].map((item) => {
               const Icon = item.icon;
               return (
@@ -950,6 +999,7 @@ export default function AdminDashboard() {
             {activeTab === "blogs" && "ব্লগ ও ইনফরমেশন প্যানেল"}
             {activeTab === "reviews" && "গ্রাহক রিভিউ প্যানেল"}
             {activeTab === "appointment" && "Appointment Panel"}
+            {activeTab === "gallery" && "ফটো গ্যালারি ম্যানেজমেন্ট"}
           </h2>
 
           {/* Right Bell notification stream */}
@@ -1824,6 +1874,69 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+
+          {/* TAB 9: PHOTO GALLERY CRUD */}
+          {activeTab === "gallery" && (
+            <div className="bg-white p-6 rounded-2xl border border-teal-50 shadow-sm space-y-6">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-450 font-medium">
+                  ফটো গ্যালারি ম্যানেজমেন্ট প্যানেল
+                </span>
+                <button
+                  onClick={() => setIsCrudModalOpen(true)}
+                  className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold curvy-button shadow-sm flex items-center space-x-1.5"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>নতুন ছবি যুক্ত করুন</span>
+                </button>
+              </div>
+
+              {/* Gallery list */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {galleryItems.map((item) => (
+                  <div
+                    key={item._id || item.id}
+                    className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between"
+                  >
+                    <div className="h-40 w-full bg-slate-100 overflow-hidden">
+                      <img
+                        src={getImageUrl(item.imageUrl)}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-4 space-y-2">
+                      <h4 className="font-bold text-slate-800 text-xs md:text-sm line-clamp-1">
+                        {item.title}
+                      </h4>
+                      {item.description && (
+                        <p className="text-slate-450 text-[10px] line-clamp-2">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="p-3 bg-slate-50 border-t border-slate-100 flex justify-end space-x-2">
+                      <button
+                        onClick={() => openEditModal("gallery", item)}
+                        className="p-1.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-650 shadow-sm"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleDeleteItem("gallery", item._id || item.id)
+                        }
+                        disabled={processingId === "delete_gallery_" + (item._id || item.id)}
+                        className="p-1.5 bg-rose-50 hover:bg-rose-100 rounded-lg text-rose-650 transition-colors disabled:opacity-50"
+                      >
+                        {processingId === "delete_gallery_" + (item._id || item.id) ? <span className="text-[10px]">...</span> : <Trash2 className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
@@ -2315,6 +2428,53 @@ export default function AdminDashboard() {
                   className="w-full py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold curvy-button shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmittingReview ? "সেভ করা হচ্ছে..." : "রিভিউ সেভ করুন"}
+                </button>
+              </form>
+            )}
+
+            {activeTab === "gallery" && (
+              <form onSubmit={handleGallerySubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    গ্যালারি টাইটেল *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={galleryTitle}
+                    onChange={(e) => setGalleryTitle(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    বিবরণ
+                  </label>
+                  <textarea
+                    value={galleryDescription}
+                    onChange={(e) => setGalleryDescription(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50"
+                    rows="3"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    {editingId ? "নতুন ছবি (পরিবর্তন করতে চাইলে)" : "ছবি আপলোড *"}
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    required={!editingId}
+                    onChange={(e) => setGalleryImageFile(e.target.files[0])}
+                    className="w-full text-xs"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSubmittingGallery}
+                  className="w-full py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold curvy-button shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmittingGallery ? "সেভ করা হচ্ছে..." : editingId ? "গ্যালারি আপডেট করুন" : "গ্যালারি সেভ করুন"}
                 </button>
               </form>
             )}
