@@ -58,12 +58,24 @@ function CircularsContent() {
               </div>
             </div>
 
+            {selectedCirc.description && (
+              <div className="mt-8 space-y-3">
+                <h3 className="font-bold text-slate-800 text-base border-b border-slate-100 pb-2 flex items-center space-x-2">
+                  <BookOpen className="w-4 h-4 text-teal-700" />
+                  <span>বিস্তারিত বিবরণ:</span>
+                </h3>
+                <p className="text-slate-600 text-xs md:text-sm leading-relaxed whitespace-pre-line">
+                  {selectedCirc.description}
+                </p>
+              </div>
+            )}
+
             <div className="mt-8 space-y-4">
               <h3 className="font-bold text-slate-800 text-base border-b border-slate-100 pb-2 flex items-center space-x-2">
-                <BookOpen className="w-4 h-4 text-teal-700" />
+                <MapPin className="w-4 h-4 text-teal-700" />
                 <span>প্রয়োজনীয় যোগ্যতাসমূহ:</span>
               </h3>
-              <ul className="space-y-2.5 text-slate-650 text-xs md:text-sm list-disc pl-5">
+              <ul className="space-y-2.5 text-slate-600 text-xs md:text-sm list-disc pl-5">
                 {selectedCirc.requirements?.map((req, i) => (
                   <li key={i}>{req}</li>
                 ))}
@@ -136,42 +148,47 @@ function CircularsContent() {
           {circulars.map((circ) => (
             <div
               key={circ._id || circ.id}
-              className="bg-white rounded-2xl overflow-hidden border border-teal-50 shadow-sm flex flex-col justify-between"
+              className="group bg-white rounded-2xl overflow-hidden border border-teal-50 shadow-sm hover:shadow-md hover:border-teal-100 transition-all duration-300 flex flex-col justify-between"
             >
-              <div className="relative h-44 w-full bg-slate-100">
+              <div className="relative h-44 w-full bg-slate-100 overflow-hidden">
                 <img
                   src={getImageUrl(circ.imageUrl)}
                   alt={circ.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <span className="absolute top-3 right-3 px-2.5 py-0.5 bg-teal-700 text-white text-[10px] font-bold rounded-full">
+                <span className="absolute top-3 right-3 px-2.5 py-0.5 bg-teal-700/90 text-white text-[10px] font-bold rounded-full backdrop-blur-sm">
                   {circ.country}
                 </span>
               </div>
 
               <div className="p-6 flex-grow flex flex-col justify-between">
                 <div>
-                  <span className="text-[10px] text-slate-400 block font-semibold mb-1">
-                    ক্যাটাগরি: {circ.jobCategory}
+                  <span className="text-[10px] text-teal-600 font-semibold mb-1 block">
+                    {circ.jobCategory}
                   </span>
-                  <h3 className="font-bold text-slate-800 text-sm md:text-base line-clamp-2 leading-snug">
+                  <h3 className="font-bold text-slate-800 text-sm md:text-base line-clamp-2 leading-snug group-hover:text-teal-700 transition-colors">
                     {circ.title}
                   </h3>
-                  <p className="text-teal-850 font-extrabold text-xs mt-3 bg-teal-50/50 py-1.5 px-3 rounded-lg w-fit">
+                  {circ.description && (
+                    <p className="text-slate-500 text-xs mt-2 line-clamp-2 leading-relaxed">
+                      {circ.description}
+                    </p>
+                  )}
+                  <p className="text-teal-800 font-extrabold text-xs mt-3 bg-teal-50 py-1.5 px-3 rounded-lg w-fit border border-teal-100">
                     বেতন: {circ.salaryRange}
                   </p>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-slate-50 flex items-center justify-between">
+                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                   <button
                     onClick={() => setSelectedCirc(circ)}
-                    className="text-xs font-bold text-teal-700 hover:text-teal-900"
+                    className="text-xs font-bold text-teal-700 hover:text-teal-900 transition-colors"
                   >
-                    যোগ্যতা দেখুন
+                    বিস্তারিত দেখুন
                   </button>
                   <a
                     href="/#appointment-form"
-                    className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold curvy-button shadow-sm"
+                    className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold curvy-button shadow-sm transition-all hover:shadow-md"
                   >
                     আবেদন ফরম
                   </a>
