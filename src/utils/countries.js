@@ -1,0 +1,25 @@
+const countries = [
+  "Australia",
+  "Bahamas",
+  "Belarus",
+  "Denmark",
+  "Dubai (UAE)",
+  "Greece",
+  "Italy",
+  "Laos",
+  "Jordan",
+  "Kuwait",
+  "Libya",
+  "Malaysia",
+  "Maldives",
+  "Mauritius",
+  "New Zealand",
+  "Qatar",
+  "Romania",
+  "Saudi Arabia",
+  "Serbia",
+  "Slovenia",
+  "Vietnam",
+];
+
+export default countries;

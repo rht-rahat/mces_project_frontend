@@ -1,18 +1,31 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../hooks/useApi';
 import { Maximize2, X, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import Pagination from '../../components/Pagination';
 
 const Gallery = () => {
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const [page, setPage] = useState(1);
+  const perPage = 12;
 
   const { data: images = [], isLoading } = useQuery({
     queryKey: ['publicGallery'],
     queryFn: api.getGallery,
   });
+
+  const totalPages = Math.max(1, Math.ceil(images.length / perPage));
+  const paginatedImages = useMemo(() => {
+    const start = (page - 1) * perPage;
+    return images.slice(start, start + perPage);
+  }, [images, page, perPage]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [images.length]);
 
   const handlePrev = useCallback(() => {
     setSelectedIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
@@ -54,14 +67,15 @@ const Gallery = () => {
 
       {images.length > 0 ? (
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {images.map((item, index) => {
-            const isFeatured = index % 5 === 0;
+          {paginatedImages.map((item, idx) => {
+            const actualIndex = (page - 1) * perPage + idx;
+            const isFeatured = actualIndex % 5 === 0;
             return (
               <motion.div
                 key={item._id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                onClick={() => setSelectedIndex(index)}
+                onClick={() => setSelectedIndex(actualIndex)}
                 className={`group relative overflow-hidden rounded-3xl bg-white border shadow-sm cursor-zoom-in ${
                   isFeatured ? 'md:col-span-2 md:row-span-2 h-[340px] md:h-[460px]' : 'h-[220px]'
                 }`}
@@ -72,7 +86,7 @@ const Gallery = () => {
                     <h3 className="font-bold text-sm truncate">{item.title}</h3>
                     <Maximize2 className="w-4 h-4 text-teal-400" />
                   </div>
-                  {item.caption && <p className="text-slate-300 text-xs mt-1 line-clamp-2">{item.caption}</p>}
+                  {item.description && <p className="text-slate-300 text-xs mt-1 line-clamp-2">{item.description}</p>}
                 </div>
               </motion.div>
             );
@@ -80,6 +94,10 @@ const Gallery = () => {
         </div>
       ) : (
         <div className="text-center py-20 text-slate-400"><ImageIcon className="w-8 h-8 mx-auto mb-2" /><span>গ্যালারিতে কোনো ছবি নেই।</span></div>
+      )}
+
+      {images.length > 0 && (
+        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
       )}
 
       {/* Lightbox Modal */}
@@ -131,7 +149,7 @@ const Gallery = () => {
             >
               <img src={selectedImage.imageUrl} alt={selectedImage.title} className="max-h-[75vh] mx-auto rounded-xl object-contain shadow-2xl" />
               <h2 className="text-white font-bold text-lg mt-4">{selectedImage.title}</h2>
-              {selectedImage.caption && <p className="text-slate-400 text-sm mt-1">{selectedImage.caption}</p>}
+              {selectedImage.description && <p className="text-slate-400 text-sm mt-1">{selectedImage.description}</p>}
             </motion.div>
           </motion.div>
         )}

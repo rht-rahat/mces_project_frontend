@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { api } from "../hooks/useApi";
 import SliderBanner from "../components/SliderBanner";
+import { showToast } from "../utils/swal";
+import Pagination from "../components/Pagination";
 
 export default function Home() {
   // 1. Fetching dynamic items
@@ -47,6 +49,27 @@ export default function Home() {
     queryKey: ["blogs"],
     queryFn: api.getBlogs,
   });
+
+  // Pagination states
+  const [pkgPage, setPkgPage] = useState(1);
+  const [blogPage, setBlogPage] = useState(1);
+  const pkgsPerPage = 6;
+  const blogsPerPage = 4;
+
+  const pkgTotalPages = Math.max(1, Math.ceil(packages.length / pkgsPerPage));
+  const paginatedPackages = useMemo(() => {
+    const start = (Math.min(pkgPage, pkgTotalPages) - 1) * pkgsPerPage;
+    return packages.slice(start, start + pkgsPerPage);
+  }, [packages, pkgPage, pkgsPerPage, pkgTotalPages]);
+
+  const blogTotalPages = Math.max(1, Math.ceil(blogs.length / blogsPerPage));
+  const paginatedBlogs = useMemo(() => {
+    const start = (Math.min(blogPage, blogTotalPages) - 1) * blogsPerPage;
+    return blogs.slice(start, start + blogsPerPage);
+  }, [blogs, blogPage, blogsPerPage, blogTotalPages]);
+
+  useEffect(() => { setPkgPage(1); }, [packages.length]);
+  useEffect(() => { setBlogPage(1); }, [blogs.length]);
 
   // 2. Tracking State
   const [trackNumber, setTrackNumber] = useState("");
@@ -103,8 +126,9 @@ export default function Home() {
       setAppointmentEmail("");
       setAppointmentPhone("");
       setAppointmentMsg("");
+      showToast('success', "আপনার অ্যাপয়েন্টমেন্ট সফলভাবে জমা দেওয়া হয়েছে।");
     } catch (err) {
-      alert("সরাসরি নোটিফিকেশন পাঠাতে সমস্যা হয়েছে। পুনরায় চেষ্টা করুন।");
+      showToast('error', "সরাসরি নোটিফিকেশন পাঠাতে সমস্যা হয়েছে। পুনরায় চেষ্টা করুন।");
     } finally {
       setIsSubmittingAppointment(false);
     }
@@ -133,8 +157,9 @@ export default function Home() {
       setContactName("");
       setContactEmail("");
       setContactMsg("");
+      showToast('success', "আপনার বার্তা সফলভাবে পাঠানো হয়েছে।");
     } catch (err) {
-      alert("যোগাযোগ ফর্ম পাঠাতে সমস্যা হয়েছে।");
+      showToast('error', "যোগাযোগ ফর্ম পাঠাতে সমস্যা হয়েছে।");
     } finally {
       setIsSubmittingContact(false);
     }
@@ -437,7 +462,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {(packages.length > 0 ? packages : []).slice(0, 6).map((pkg, idx) => (
+          {(packages.length > 0 ? paginatedPackages : []).map((pkg, idx) => (
             <motion.div
               key={pkg._id || pkg.id}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -499,6 +524,10 @@ export default function Home() {
             </div>
           )}
         </div>
+
+        {packages.length > 0 && (
+          <Pagination currentPage={pkgPage} totalPages={pkgTotalPages} onPageChange={setPkgPage} />
+        )}
       </section>
 
       {/* 5. Skilled Labor Circulars Section */}
@@ -791,7 +820,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {(blogs.length > 0 ? blogs : []).map((post, idx) => (
+          {(blogs.length > 0 ? paginatedBlogs : []).map((post, idx) => (
             <motion.div
               key={post._id || post.id}
               initial={{ opacity: 0, y: 25 }}
@@ -830,6 +859,10 @@ export default function Home() {
             </motion.div>
           ))}
         </div>
+
+        {blogs.length > 0 && (
+          <Pagination currentPage={blogPage} totalPages={blogTotalPages} onPageChange={setBlogPage} />
+        )}
       </section>
 
       {/* 9. Contact Page Section (Details, Form, Map Pointer) */}

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import useStore from '../../store/useStore';
 import { api } from '../../hooks/useApi';
+import countries from '../../utils/countries';
 
 export default function UserDashboard() {
   const router = useRouter();
@@ -203,12 +204,9 @@ export default function UserDashboard() {
                   className="w-full px-4 py-2 text-xs border border-slate-200 curvy-input focus:outline-none focus:border-teal-700 bg-slate-50 focus:bg-white"
                 >
                   <option value="">দেশ নির্বাচন করুন</option>
-                  <option value="Romania">Romania</option>
-                  <option value="Japan">Japan</option>
-                  <option value="Saudi Arabia">Saudi Arabia</option>
-                  <option value="UAE">UAE</option>
-                  <option value="Italy">Italy</option>
-                  <option value="Singapore">Singapore</option>
+                  {countries.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
                 </select>
               </div>
 

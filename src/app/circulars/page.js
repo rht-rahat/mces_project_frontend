@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Briefcase, MapPin, Globe, Users, ArrowLeft, Filter, BookOpen } from 'lucide-react';
 import { api } from '../../hooks/useApi';
+import countries from '../../utils/countries';
 
 function CircularsContent() {
   const router = useRouter();
@@ -26,7 +27,6 @@ function CircularsContent() {
     return url.startsWith('/') ? `http://localhost:5000${url}` : url;
   };
 
-  const countries = ['Romania', 'Japan', 'Saudi Arabia', 'UAE', 'Singapore'];
   const categories = ['Construction', 'Caregiver', 'Driving', 'Hospitality', 'IT/Engineering'];
 
   return (

@@ -49,9 +49,13 @@ import {
   Send,
   AlertTriangle,
   Clock,
+  Upload,
 } from "lucide-react";
 import { api, API_BASE } from "../../hooks/useApi";
 import useStore from "../../store/useStore";
+import { showToast, confirmDelete } from "../../utils/swal";
+import Pagination from "../../components/Pagination";
+import countries from "../../utils/countries";
 import Link from "next/link";
 
 export default function AdminDashboard() {
@@ -94,6 +98,8 @@ export default function AdminDashboard() {
 
   // Search passport state
   const [passportSearch, setPassportSearch] = useState("");
+  const [passportPage, setPassportPage] = useState(1);
+  const passportsPerPage = 10;
 
   // Real-time Chat state
   const [adminReplyText, setAdminReplyText] = useState("");
@@ -240,6 +246,13 @@ export default function AdminDashboard() {
     enabled: !!user && user.role === "admin",
   });
 
+  const passportTotalPages = Math.max(1, Math.ceil(passports.length / passportsPerPage));
+  const safePassportPage = Math.min(passportPage, passportTotalPages);
+  const paginatedPassports = passports.slice(
+    (safePassportPage - 1) * passportsPerPage,
+    safePassportPage * passportsPerPage
+  );
+
   // Handle Admin Credentials Login
   const handleAdminLogin = async (e) => {
     e.preventDefault();
@@ -279,8 +292,9 @@ export default function AdminDashboard() {
     try {
       await api.updatePassportStatus(id, status, token);
       refetchPassports();
+      showToast('success', "পাসপোর্ট স্ট্যাটাস আপডেট করা হয়েছে।");
     } catch (err) {
-      alert("স্ট্যাটাস আপডেট ব্যর্থ হয়েছে।");
+      showToast('error', "স্ট্যাটাস আপডেট ব্যর্থ হয়েছে।");
     }
   };
 
@@ -291,8 +305,9 @@ export default function AdminDashboard() {
     try {
       await api.updateAppointmentStatus(id, status, token);
       refetchAppointments();
+      showToast('success', "অ্যাপয়েন্টমেন্ট স্ট্যাটাস আপডেট করা হয়েছে।");
     } catch (err) {
-      alert("স্ট্যাটাস আপডেট ব্যর্থ হয়েছে।");
+      showToast('error', "স্ট্যাটাস আপডেট ব্যর্থ হয়েছে।");
     } finally {
       setProcessingId(null);
     }
@@ -437,16 +452,14 @@ export default function AdminDashboard() {
       doc.save(`MCES_Appointment_${app.name || "Customer"}.pdf`);
     } catch (error) {
       console.error("PDF generation error:", error);
-      alert("পিডিএফ জেনারেট করতে সমস্যা হয়েছে।");
+      showToast('error', "পিডিএফ জেনারেট করতে সমস্যা হয়েছে।");
     }
   };
 
   // Delete handler with strict confirmation requirement
   const handleDeleteItem = async (type, id) => {
-    const confirmDelete = window.confirm(
-      "আপনি কি নিশ্চিত যে আপনি এই রেকর্ডটি চিরতরে মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা সম্ভব হবে না।",
-    );
-    if (!confirmDelete) return;
+    const confirmed = await confirmDelete();
+    if (!confirmed) return;
 
     const key = "delete_" + type + "_" + id;
     setProcessingId(key);
@@ -473,8 +486,9 @@ export default function AdminDashboard() {
         await api.deleteGallery(id, token);
         refetchGallery();
       }
+      showToast('success', "রেকর্ডটি মুছে ফেলা হয়েছে।");
     } catch (err) {
-      alert("মুছে ফেলা ব্যর্থ হয়েছে।");
+      showToast('error', "মুছে ফেলা ব্যর্থ হয়েছে।");
     } finally {
       setProcessingId(null);
     }
@@ -499,7 +513,7 @@ export default function AdminDashboard() {
       );
       setMessages((prev) => [...prev, savedReply]);
     } catch (err) {
-      alert("বার্তা পাঠানো যায়নি।");
+      showToast('error', "বার্তা পাঠানো যায়নি।");
     } finally {
       setIsSendingReply(false);
     }
@@ -521,15 +535,17 @@ export default function AdminDashboard() {
     try {
       if (editingId) {
         await api.updateSlider(editingId, formData, token);
+        showToast('success', "স্লাইডার আপডেট করা হয়েছে।");
       } else {
         if (!sliderImageFile)
-          return alert("স্লাইডারের জন্য একটি ছবি আপলোড করা আবশ্যক।");
+          return showToast('warning', "স্লাইডারের জন্য একটি ছবি আপলোড করা আবশ্যক।");
         await api.addSlider(formData, token);
+        showToast('success', "স্লাইডার যুক্ত করা হয়েছে।");
       }
       refetchSliders();
       closeModal();
     } catch (err) {
-      alert("স্লাইডার সেভ করা যায়নি।");
+      showToast('error', "স্লাইডার সেভ করা যায়নি।");
     } finally {
       setIsSubmittingSlider(false);
     }
@@ -555,14 +571,16 @@ export default function AdminDashboard() {
     try {
       if (editingId) {
         await api.updatePackage(editingId, formData, token);
+        showToast('success', "প্যাকেজ আপডেট করা হয়েছে।");
       } else {
-        if (!pkgImageFile) return alert("প্যাকেজের ছবি আপলোড করা আবশ্যক।");
+        if (!pkgImageFile) return showToast('warning', "প্যাকেজের ছবি আপলোড করা আবশ্যক।");
         await api.addPackage(formData, token);
+        showToast('success', "প্যাকেজ যুক্ত করা হয়েছে।");
       }
       refetchPackages();
       closeModal();
     } catch (err) {
-      alert("প্যাকেজ সেভ করা যায়নি।");
+      showToast('error', "প্যাকেজ সেভ করা যায়নি।");
     } finally {
       setIsSubmittingPackage(false);
     }
@@ -587,14 +605,16 @@ export default function AdminDashboard() {
     try {
       if (editingId) {
         await api.updateCircular(editingId, formData, token);
+        showToast('success', "সার্কুলার আপডেট করা হয়েছে।");
       } else {
-        if (!circImageFile) return alert("সার্কুলারের ছবি আপলোড করা আবশ্যক।");
+        if (!circImageFile) return showToast('warning', "সার্কুলারের ছবি আপলোড করা আবশ্যক।");
         await api.addCircular(formData, token);
+        showToast('success', "সার্কুলার যুক্ত করা হয়েছে।");
       }
       refetchCirculars();
       closeModal();
     } catch (err) {
-      alert("সার্কুলার সেভ করা যায়নি।");
+      showToast('error', "সার্কুলার সেভ করা যায়নি।");
     } finally {
       setIsSubmittingCircular(false);
     }
@@ -614,12 +634,13 @@ export default function AdminDashboard() {
 
     try {
       if (!revImageFile && !editingId)
-        return alert("ক্লায়েন্টের ছবি আপলোড করা আবশ্যক।");
+        return showToast('warning', "ক্লায়েন্টের ছবি আপলোড করা আবশ্যক।");
       await api.addReview(formData, token);
+      showToast('success', "রিভিউ যুক্ত করা হয়েছে।");
       refetchReviews();
       closeModal();
     } catch (err) {
-      alert("রিভিউ সেভ করা যায়নি।");
+      showToast('error', "রিভিউ সেভ করা যায়নি।");
     } finally {
       setIsSubmittingReview(false);
     }
@@ -628,7 +649,7 @@ export default function AdminDashboard() {
   const handleBlogSubmit = async (e) => {
     e.preventDefault();
     if (!blogImageFile && !editingId)
-      return alert("ব্লগ ফিচার্ড ছবি আপলোড করা আবশ্যক।");
+      return showToast('warning', "ব্লগ ফিচার্ড ছবি আপলোড করা আবশ্যক।");
     setIsSubmittingBlog(true);
     const formData = new FormData();
     formData.append("title", blogTitle);
@@ -640,10 +661,11 @@ export default function AdminDashboard() {
 
     try {
       await api.addBlog(formData, token);
+      showToast('success', "ব্লগ যুক্ত করা হয়েছে।");
       refetchBlogs();
       closeModal();
     } catch (err) {
-      alert("ব্লগ সেভ করা যায়নি।");
+      showToast('error', "ব্লগ সেভ করা যায়নি।");
     } finally {
       setIsSubmittingBlog(false);
     }
@@ -662,15 +684,17 @@ export default function AdminDashboard() {
     try {
       if (editingId) {
         await api.updateGallery(editingId, formData, token);
+        showToast('success', "গ্যালারি আপডেট করা হয়েছে।");
       } else {
         if (!galleryImageFile)
-          return alert("গ্যালারির জন্য একটি ছবি আপলোড করা আবশ্যক।");
+          return showToast('warning', "গ্যালারির জন্য একটি ছবি আপলোড করা আবশ্যক।");
         await api.addGallery(formData, token);
+        showToast('success', "গ্যালারি যুক্ত করা হয়েছে।");
       }
       refetchGallery();
       closeModal();
     } catch (err) {
-      alert("গ্যালারি সেভ করা যায়নি।");
+      showToast('error', "গ্যালারি সেভ করা যায়নি।");
     } finally {
       setIsSubmittingGallery(false);
     }
@@ -679,7 +703,7 @@ export default function AdminDashboard() {
   const handlePassportSubmit = async (e) => {
     e.preventDefault();
     if (!passportFile && !editingId) {
-      alert("পাসপোর্ট এর পিডিএফ ফাইল আপলোড করা আবশ্যক।");
+      showToast('warning', "পাসপোর্ট এর পিডিএফ ফাইল আপলোড করা আবশ্যক।");
       return;
     }
 
@@ -695,10 +719,11 @@ export default function AdminDashboard() {
 
     try {
       await api.submitPassport(formData, token);
+      showToast('success', "পাসপোর্ট যুক্ত করা হয়েছে।");
       refetchPassports();
       closeModal();
     } catch (err) {
-      alert(err.message || "পাসপোর্ট সেভ করা যায়নি।");
+      showToast('error', err.message || "পাসপোর্ট সেভ করা যায়নি।");
     } finally {
       setIsSubmittingPassport(false);
     }
@@ -709,8 +734,9 @@ export default function AdminDashboard() {
     try {
       await api.clearNotifications(token);
       setNotifications([]);
+      showToast('success', "নোটিফিকেশন ক্লিয়ার করা হয়েছে।");
     } catch (e) {
-      alert("নোটিফিকেশন ক্লিয়ার করা যায়নি।");
+      showToast('error', "নোটিফিকেশন ক্লিয়ার করা যায়নি।");
     } finally {
       setIsClearingNotifs(false);
     }
@@ -911,7 +937,7 @@ export default function AdminDashboard() {
               <div className="p-2 bg-teal-600 text-white rounded-tr-lg rounded-bl-lg">
                 <ShieldCheck className="w-5 h-5 animate-pulse" />
               </div>
-              <span className="text-lg font-bold text-white">MCES Admin</span>
+              <Link href={"/"}><span className="text-lg font-bold text-white">MCES Admin</span></Link>
             </div>
             <button
               onClick={() => {
@@ -1342,6 +1368,7 @@ export default function AdminDashboard() {
                     value={passportSearch}
                     onChange={(e) => {
                       setPassportSearch(e.target.value);
+                      setPassportPage(1);
                       setTimeout(() => refetchPassports(), 300);
                     }}
                     className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50 focus:bg-white font-medium"
@@ -1371,7 +1398,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-                    {passports.map((pass) => (
+                    {paginatedPassports.map((pass) => (
                       <tr key={pass.id}>
                         <td className="py-3.5 font-semibold font-medium">
                           {pass.holderName}
@@ -1436,6 +1463,10 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+
+              {passports.length > 0 && (
+                <Pagination currentPage={safePassportPage} totalPages={passportTotalPages} onPageChange={setPassportPage} />
+              )}
             </div>
           )}
 
@@ -2010,12 +2041,19 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     স্লাইডার ব্যানার ইমেজ *
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setSliderImageFile(e.target.files[0])}
-                    className="w-full text-xs"
-                  />
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50 transition-colors relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setSliderImageFile(e.target.files[0])}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                    <span className="text-xs text-slate-500 block">
+                      {sliderImageFile ? sliderImageFile.name : 'ক্লিক করে ছবি আপলোড করুন'}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block mt-1">JPG, PNG (সর্বোচ্চ ৫ এমবি)</span>
+                  </div>
                 </div>
                 <button
                   type="submit"
@@ -2099,12 +2137,19 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     ফিচার্ড ইমেজ *
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setCircImageFile(e.target.files[0])}
-                    className="w-full text-xs"
-                  />
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50 transition-colors relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setCircImageFile(e.target.files[0])}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                    <span className="text-xs text-slate-500 block">
+                      {circImageFile ? circImageFile.name : 'ক্লিক করে ছবি আপলোড করুন'}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block mt-1">JPG, PNG (সর্বোচ্চ ৫ এমবি)</span>
+                  </div>
                 </div>
                 <button
                   type="submit"
@@ -2153,12 +2198,9 @@ export default function AdminDashboard() {
                     className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50 bg-white"
                   >
                     <option value="">দেশ নির্বাচন করুন</option>
-                    <option value="Romania">Romania</option>
-                    <option value="Japan">Japan</option>
-                    <option value="Saudi Arabia">Saudi Arabia</option>
-                    <option value="UAE">UAE</option>
-                    <option value="Italy">Italy</option>
-                    <option value="Singapore">Singapore</option>
+                    {countries.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -2177,13 +2219,20 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-semibold text-slate-650 mb-1">
                     পাসপোর্ট এর পিডিএফ ফাইল *
                   </label>
-                  <input
-                    type="file"
-                    required={!editingId}
-                    accept=".pdf"
-                    onChange={(e) => setPassportFile(e.target.files[0])}
-                    className="w-full text-xs"
-                  />
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50 transition-colors relative">
+                    <input
+                      type="file"
+                      required={!editingId}
+                      accept=".pdf"
+                      onChange={(e) => setPassportFile(e.target.files[0])}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                    <span className="text-xs text-slate-500 block">
+                      {passportFile ? passportFile.name : 'ক্লিক করে পিডিএফ ফাইলটি আপলোড করুন'}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block mt-1">সর্বোচ্চ ১০ এমবি (PDF ফরম্যাট)</span>
+                  </div>
                 </div>
                 <button
                   type="submit"
@@ -2278,12 +2327,19 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     প্যাকেজ ইমেজ *
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setPkgImageFile(e.target.files[0])}
-                    className="w-full text-xs"
-                  />
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50 transition-colors relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setPkgImageFile(e.target.files[0])}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                    <span className="text-xs text-slate-500 block">
+                      {pkgImageFile ? pkgImageFile.name : 'ক্লিক করে ছবি আপলোড করুন'}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block mt-1">JPG, PNG (সর্বোচ্চ ৫ এমবি)</span>
+                  </div>
                 </div>
                 <button
                   type="submit"
@@ -2337,12 +2393,19 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     ব্লগ কাভার ইমেজ *
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setBlogImageFile(e.target.files[0])}
-                    className="w-full text-xs"
-                  />
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50 transition-colors relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setBlogImageFile(e.target.files[0])}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                    <span className="text-xs text-slate-500 block">
+                      {blogImageFile ? blogImageFile.name : 'ক্লিক করে ছবি আপলোড করুন'}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block mt-1">JPG, PNG (সর্বোচ্চ ৫ এমবি)</span>
+                  </div>
                 </div>
                 <button
                   type="submit"
@@ -2415,12 +2478,19 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     গ্রাহকের ছবি *
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setRevImageFile(e.target.files[0])}
-                    className="w-full text-xs"
-                  />
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50 transition-colors relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setRevImageFile(e.target.files[0])}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                    <span className="text-xs text-slate-500 block">
+                      {revImageFile ? revImageFile.name : 'ক্লিক করে ছবি আপলোড করুন'}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block mt-1">JPG, PNG (সর্বোচ্চ ৫ এমবি)</span>
+                  </div>
                 </div>
                 <button
                   type="submit"
@@ -2461,13 +2531,20 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     {editingId ? "নতুন ছবি (পরিবর্তন করতে চাইলে)" : "ছবি আপলোড *"}
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    required={!editingId}
-                    onChange={(e) => setGalleryImageFile(e.target.files[0])}
-                    className="w-full text-xs"
-                  />
+                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:bg-slate-50 transition-colors relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      required={!editingId}
+                      onChange={(e) => setGalleryImageFile(e.target.files[0])}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <Upload className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                    <span className="text-xs text-slate-500 block">
+                      {galleryImageFile ? galleryImageFile.name : 'ক্লিক করে ছবি আপলোড করুন'}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block mt-1">JPG, PNG (সর্বোচ্চ ৫ এমবি)</span>
+                  </div>
                 </div>
                 <button
                   type="submit"
