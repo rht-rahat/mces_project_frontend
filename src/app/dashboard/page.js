@@ -2084,41 +2084,53 @@ export default function AdminDashboard() {
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
                       দেশ *
                     </label>
-                    <input
-                      type="text"
+                    <select
                       required
                       value={circCountry}
                       onChange={(e) => setCircCountry(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50"
-                      placeholder="যেমন: Romania"
-                    />
+                      className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50 bg-white"
+                    >
+                      <option value="">দেশ নির্বাচন করুন</option>
+                      {countries.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
                       ক্যাটাগরি *
                     </label>
-                    <input
-                      type="text"
+                    <select
                       required
                       value={circCat}
                       onChange={(e) => setCircCat(e.target.value)}
-                      className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50"
-                      placeholder="যেমন: Construction"
-                    />
+                      className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50 bg-white"
+                    >
+                      <option value="">ক্যাটাগরি নির্বাচন করুন</option>
+                      {['Construction', 'Caregiver', 'Driving', 'Hospitality', 'IT/Engineering'].map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     বেতন পরিসীমা *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     required
                     value={circSalary}
                     onChange={(e) => setCircSalary(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50"
-                    placeholder="যেমন: ৮০০ ইউরো / মাস"
-                  />
+                    className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50 bg-white"
+                  >
+                    <option value="">বেতন পরিসীমা নির্বাচন করুন</option>
+                    <option value="$500 - $800 / মাস">$500 - $800 / মাস</option>
+                    <option value="$800 - $1000 / মাস">$800 - $1000 / মাস</option>
+                    <option value="$1000 - $1500 / মাস">$1000 - $1500 / মাস</option>
+                    <option value="$1500 - $2000 / মাস">$1500 - $2000 / মাস</option>
+                    <option value="$2000 - $3000 / মাস">$2000 - $3000 / মাস</option>
+                    <option value="$3000+ / মাস">$3000+ / মাস</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
