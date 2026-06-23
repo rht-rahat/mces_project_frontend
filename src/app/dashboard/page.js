@@ -51,7 +51,7 @@ import {
   Clock,
   Upload,
 } from "lucide-react";
-import { api, API_BASE } from "../../hooks/useApi";
+import { api, API_BASE, getImageUrl } from "../../hooks/useApi";
 import useStore from "../../store/useStore";
 import { showToast, confirmDelete } from "../../utils/swal";
 import Pagination from "../../components/Pagination";
@@ -920,11 +920,6 @@ export default function AdminDashboard() {
     { name: "ব্লগ", সংখ্যা: blogs.length },
     { name: "পাসপোর্ট", সংখ্যা: totalPassports },
   ];
-
-  const getImageUrl = (url) => {
-    if (!url) return "";
-    return url.startsWith("/") ? `http://localhost:5000${url}` : url;
-  };
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row text-slate-800">
@@ -2107,7 +2102,7 @@ export default function AdminDashboard() {
                       className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50 bg-white"
                     >
                       <option value="">ক্যাটাগরি নির্বাচন করুন</option>
-                      {['Construction', 'Caregiver', 'Driving', 'Hospitality', 'IT/Engineering'].map((cat) => (
+                      {['Construction', "Labor Worker", "Mason", "Carpenter", "Scaffolder", ' Civil Engineer', " Piping Engineer", "Civil Supervisor", 'Caregiver', 'Driving', 'Hospitality', 'IT/Engineering', "Civil Foreman", "Piping Supervisor", ' Piping Foreman', "Pipe Fitter", "Welder", "Plumber", "Helper"].map((cat) => (
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Clock, MapPin, Tag, CheckCircle, Calendar } from 'lucide-react';
-import { api } from '../../../hooks/useApi';
+import { api, getImageUrl } from '../../../hooks/useApi';
 
 export default function PackageDetails({ params }) {
   const router = useRouter();
@@ -19,11 +19,6 @@ export default function PackageDetails({ params }) {
     queryFn: () => api.getPackage(id),
     enabled: !!id
   });
-
-  const getImageUrl = (url) => {
-    if (!url) return '';
-    return url.startsWith('/') ? `http://localhost:5000${url}` : url;
-  };
 
   if (isLoading) {
     return (

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-import { api } from '../hooks/useApi';
+import { api, getImageUrl } from '../hooks/useApi';
 
 const SEEDED_FALLBACK = [
   {
@@ -86,12 +86,6 @@ export default function SliderBanner() {
   };
 
   const activeSlide = activeSliders[currentIndex];
-
-  // Resolve base prefix for image URL if it's uploaded locally
-  const getImageUrl = (url) => {
-    if (!url) return '';
-    return url.startsWith('/') ? `http://localhost:5000${url}` : url;
-  };
 
   return (
     <div className="relative h-[550px] md:h-[650px] w-full overflow-hidden bg-teal-950">

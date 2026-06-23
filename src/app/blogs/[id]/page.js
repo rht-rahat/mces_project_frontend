@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, User, Calendar, BookOpen } from 'lucide-react';
-import { api } from '../../../hooks/useApi';
+import { api, getImageUrl } from '../../../hooks/useApi';
 
 export default function BlogDetails({ params }) {
   const router = useRouter();
@@ -17,11 +17,6 @@ export default function BlogDetails({ params }) {
     queryFn: () => api.getBlog(id),
     enabled: !!id
   });
-
-  const getImageUrl = (url) => {
-    if (!url) return '';
-    return url.startsWith('/') ? `http://localhost:5000${url}` : url;
-  };
 
   if (isLoading) {
     return (

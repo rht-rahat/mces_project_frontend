@@ -8,7 +8,7 @@ import {
   Upload, Search, FileDown, MessageSquare
 } from 'lucide-react';
 import useStore from '../../store/useStore';
-import { api } from '../../hooks/useApi';
+import { api, getImageUrl } from '../../hooks/useApi';
 import countries from '../../utils/countries';
 
 export default function UserDashboard() {
@@ -131,7 +131,7 @@ export default function UserDashboard() {
   // Resolve base prefix for PDF download
   const getPdfUrl = (url) => {
     if (!url) return '#';
-    return url.startsWith('/') ? `http://localhost:5000${url}` : url;
+    return url.startsWith('/') ? `https://mces-project-backend.vercel.app${url}` : url;
   };
 
   return (

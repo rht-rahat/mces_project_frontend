@@ -23,7 +23,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { api } from "../hooks/useApi";
+import { api, getImageUrl } from "../hooks/useApi";
 import SliderBanner from "../components/SliderBanner";
 import { showToast } from "../utils/swal";
 import Pagination from "../components/Pagination";
@@ -163,14 +163,6 @@ export default function Home() {
     } finally {
       setIsSubmittingContact(false);
     }
-  };
-
-  // Resolve locally-saved image URLs if necessary
-  const getImageUrl = (url) => {
-    if (!url) return "";
-    return url.startsWith("/")
-      ? `https://mces-project-backend.vercel.app/${url}`
-      : url;
   };
 
   const services = [

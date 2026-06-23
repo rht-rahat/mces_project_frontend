@@ -4,7 +4,7 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Briefcase, MapPin, Globe, Users, ArrowLeft, Filter, BookOpen } from 'lucide-react';
-import { api } from '../../hooks/useApi';
+import { api, getImageUrl } from '../../hooks/useApi';
 import countries from '../../utils/countries';
 
 function CircularsContent() {
@@ -22,12 +22,7 @@ function CircularsContent() {
     queryFn: () => api.getCirculars({ country, jobCategory })
   });
 
-  const getImageUrl = (url) => {
-    if (!url) return '';
-    return url.startsWith('/') ? `http://localhost:5000${url}` : url;
-  };
-
-  const categories = ['Construction', 'Caregiver', 'Driving', 'Hospitality', 'IT/Engineering'];
+  const categories = ['Construction', "Labor Worker", "Mason", "Carpenter", "Scaffolder", ' Civil Engineer', " Piping Engineer", "Civil Supervisor", 'Caregiver', 'Driving', 'Hospitality', 'IT/Engineering', "Civil Foreman", "Piping Supervisor", ' Piping Foreman', "Pipe Fitter", "Welder", "Plumber", "Helper"];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

@@ -2,6 +2,13 @@ export const API_BASE = process.env.NEXT_PUBLIC_API_URL
   ? `${process.env.NEXT_PUBLIC_API_URL}/api` 
   : 'http://localhost:5000/api';
 
+export const IMAGE_BASE = API_BASE.replace('/api', '');
+
+export const getImageUrl = (url) => {
+  if (!url) return '';
+  return url.startsWith('/') ? `${IMAGE_BASE}${url}` : url;
+};
+
 // Helper to construct authorization header
 const getHeaders = (token) => {
   const headers = {};
