@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0f766e; /* Curated teal primary */
+  --color-primary-light: #ccfbf1;
+  --color-primary-dark: #115e59;
+  --color-accent: #f59e0b; /* Golden accent */
+  --color-accent-light: #fef3c7;
+  --color-bg-gradient-start: #f0fdfa; /* Curated soft teal gradient */
+  --color-bg-gradient-end: #ecfeff;
+}
+
+:root {
+  --background: #fafdfd;
+  --foreground: #1e293b;
+}
+
+body {
+  background: linear-gradient(135deg, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
+  color: var(--foreground);
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Custom Curvy UI System */
+.curvy-card {
+  border-radius: 2.5rem 0.75rem 2.5rem 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 30px -15px rgba(15, 118, 110, 0.1);
+}
+
+.curvy-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px -15px rgba(15, 118, 110, 0.18);
+  border-radius: 0.75rem 2.5rem 0.75rem 2.5rem; /* Alternate curvy borders on hover! Extremely dynamic! */
+}
+
+.curvy-button {
+  border-radius: 1.5rem 0.5rem 1.5rem 0.5rem;
+  transition: all 0.25s ease;
+}
+
+.curvy-button:hover {
+  border-radius: 0.5rem 1.5rem 0.5rem 1.5rem;
+}
+
+.curvy-input {
+  border-radius: 1rem 0.25rem 1rem 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.curvy-input:focus {
+  border-radius: 0.25rem 1rem 0.25rem 1rem;
+}
+
+/* Smooth custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f0fdfa;
+}
+::-webkit-scrollbar-thumb {
+  background: #0f766e;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #115e59;
+}
+
+/* Curve Divider Background Shapes */
+.wave-bg {
+  position: relative;
+  background-color: #ffffff;
+}
+
+.wave-bg::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='1' d='M0,96L80,117.3C160,139,320,181,480,181.3C640,181,80,139,960,117.3C1120,96,1280,96,1360,96L1440,96L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z'%3E%3C/path%3E%3C/svg%3E");
+  background-size: cover;
+  z-index: 10;
+}
