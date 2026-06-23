@@ -129,6 +129,7 @@ export default function AdminDashboard() {
   const [circCountry, setCircCountry] = useState("");
   const [circCat, setCircCat] = useState("");
   const [circSalary, setCircSalary] = useState("");
+  const [circDescription, setCircDescription] = useState("");
   const [circReqs, setCircReqs] = useState("");
   const [circImageFile, setCircImageFile] = useState(null);
 
@@ -593,6 +594,7 @@ export default function AdminDashboard() {
     formData.append("title", circTitle);
     formData.append("country", circCountry);
     formData.append("jobCategory", circCat);
+    formData.append("description", circDescription);
     formData.append("salaryRange", circSalary);
 
     const reqsArray = circReqs.split("\n").filter(Boolean);
@@ -774,6 +776,7 @@ export default function AdminDashboard() {
     setCircCountry("");
     setCircCat("");
     setCircSalary("");
+    setCircDescription("");
     setCircReqs("");
     setCircImageFile(null);
     setRevName("");
@@ -816,6 +819,7 @@ export default function AdminDashboard() {
       setCircCountry(item.country);
       setCircCat(item.jobCategory);
       setCircSalary(item.salaryRange);
+      setCircDescription(item.description || "");
       setCircReqs(item.requirements?.join("\n") || "");
     } else if (type === "gallery") {
       setGalleryTitle(item.title);
@@ -2074,6 +2078,18 @@ export default function AdminDashboard() {
                     className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50"
                   />
                 </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    বিবরণ
+                  </label>
+                  <textarea
+                    value={circDescription}
+                    onChange={(e) => setCircDescription(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50"
+                    rows="3"
+                    placeholder="চাকরির বিস্তারিত বিবরণ লিখুন..."
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1">
@@ -2112,20 +2128,14 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     বেতন পরিসীমা *
                   </label>
-                  <select
+                  <input
+                    type="text"
                     required
                     value={circSalary}
                     onChange={(e) => setCircSalary(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50 bg-white"
-                  >
-                    <option value="">বেতন পরিসীমা নির্বাচন করুন</option>
-                    <option value="$500 - $800 / মাস">$500 - $800 / মাস</option>
-                    <option value="$800 - $1000 / মাস">$800 - $1000 / মাস</option>
-                    <option value="$1000 - $1500 / মাস">$1000 - $1500 / মাস</option>
-                    <option value="$1500 - $2000 / মাস">$1500 - $2000 / মাস</option>
-                    <option value="$2000 - $3000 / মাস">$2000 - $3000 / মাস</option>
-                    <option value="$3000+ / মাস">$3000+ / মাস</option>
-                  </select>
+                    className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50"
+                    placeholder="যেমন: ৮০০ ইউরো / মাস"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
