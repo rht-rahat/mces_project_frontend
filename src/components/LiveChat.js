@@ -41,11 +41,8 @@ export default function LiveChat() {
     if (!isOpen || !userId || !hasDetails) return;
 
     api.getChatHistory(userId)
-      .then(history => {
-        setMessages(history);
-        scrollToBottom();
-      })
-      .catch(err => console.error('Error loading chat history:', err));
+      .then(setMessages)
+      .catch(() => {});
 
     // Poll for new messages every 3 seconds (replaces SSE for Vercel deployment)
     const interval = setInterval(() => {
@@ -165,7 +162,7 @@ export default function LiveChat() {
                     কোন মেসেজ নেই। নিচে আপনার প্রশ্নটি লিখে পাঠান।
                   </div>
                 ) : (
-                  messages.map((msg, index) => {
+                  messages.filter(Boolean).map((msg, index) => {
                     const isSelf = msg.sender === 'user';
                     return (
                       <div
@@ -173,7 +170,7 @@ export default function LiveChat() {
                         className={`flex flex-col ${isSelf ? 'items-end' : 'items-start'}`}
                       >
                         <span className="text-[9px] text-slate-400 mb-0.5 px-1">
-                          {isSelf ? 'আপনি' : msg.senderName}
+                          {isSelf ? 'আপনি' : msg.senderName || ''}
                         </span>
                         <div
                           className={`max-w-[75%] px-3.5 py-2 text-xs rounded-2xl shadow-sm ${
@@ -182,7 +179,7 @@ export default function LiveChat() {
                               : 'bg-white text-slate-800 rounded-tl-none border border-slate-100'
                           }`}
                         >
-                          {msg.message}
+                          {msg.message || ''}
                         </div>
                       </div>
                     );

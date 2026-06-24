@@ -27,6 +27,7 @@ import {
   ShieldCheck,
   Star,
   Calendar,
+  ArrowLeft,
   ArrowRight,
   Search,
   Eye,
@@ -185,12 +186,11 @@ export default function AdminDashboard() {
 
   // 2. Fetching history when active chat thread changes
   useEffect(() => {
-    if (!activeThread) return;
+    if (!activeThread?.userId) return;
     api
       .getChatHistory(activeThread.userId)
       .then(setMessages)
-      .then(scrollToBottom)
-      .catch(console.error);
+      .catch(() => {});
   }, [activeThread]);
 
   useEffect(() => {
@@ -1504,9 +1504,9 @@ export default function AdminDashboard() {
                       কোনো চ্যাট রিকোয়েস্ট নেই।
                     </div>
                   ) : (
-                    threads.map((thread) => {
-                      const isActive = activeThread?.userId === thread.userId;
-                      return (
+                    threads.filter(Boolean).map((thread) => {
+                      const isActive = activeThread?.userId === thread?.userId;
+                      return thread ? (
                         <div
                           key={thread.userId}
                           onClick={() => { setActiveThread(thread); setShowChatList(false); }}
@@ -1514,20 +1514,20 @@ export default function AdminDashboard() {
                         >
                           <div className="flex justify-between items-baseline mb-1">
                             <h4 className="font-bold text-slate-800 text-xs md:text-sm">
-                              {thread.senderName}
+                              {thread.senderName || 'Unknown'}
                             </h4>
                             <span className="text-[9px] text-slate-400">
-                              {new Date(thread.updatedAt).toLocaleTimeString(
+                              {thread.updatedAt ? new Date(thread.updatedAt).toLocaleTimeString(
                                 "bn-BD",
                                 { hour: "2-digit", minute: "2-digit" },
-                              )}
+                              ) : ''}
                             </span>
                           </div>
                           <p className="text-slate-500 text-xs truncate leading-normal">
-                            {thread.lastMessage}
+                            {thread.lastMessage || ''}
                           </p>
                         </div>
-                      );
+                      ) : null;
                     })
                   )}
                 </div>
@@ -1557,7 +1557,7 @@ export default function AdminDashboard() {
                     {/* Messages Body */}
                     <div className="flex-grow p-4 overflow-y-auto space-y-3">
                       {Array.isArray(messages) && messages.length > 0 ? (
-                        messages.map((msg, index) => {
+                        messages.filter(Boolean).map((msg, index) => {
                           const isAdmin = msg.sender === "admin";
                           return (
                             <div
@@ -1565,7 +1565,7 @@ export default function AdminDashboard() {
                               className={`flex flex-col ${isAdmin ? "items-end" : "items-start"}`}
                             >
                               <span className="text-[9px] text-slate-400 mb-0.5 px-1">
-                                {isAdmin ? "অ্যাডমিন সাপোর্ট" : msg.senderName}
+                                {isAdmin ? "অ্যাডমিন সাপোর্ট" : msg.senderName || ''}
                               </span>
                               <div
                                 className={`max-w-[85%] md:max-w-[70%] px-3.5 py-2.5 text-xs rounded-2xl shadow-sm ${
@@ -1574,14 +1574,14 @@ export default function AdminDashboard() {
                                     : "bg-white text-slate-800 rounded-tl-none border border-slate-100"
                                 }`}
                               >
-                                {msg.message}
+                                {msg.message || ''}
                               </div>
                             </div>
                           );
                         })
                       ) : (
                         <div className="text-center text-xs text-slate-400 py-8">
-                          {isLoading ? 'মেসেজ লোড হচ্ছে...' : 'কোনো মেসেজ পাওয়া যায়নি।'}
+                          {'কোনো মেসেজ পাওয়া যায়নি।'}
                         </div>
                       )}
                       <div ref={chatEndRef} />
