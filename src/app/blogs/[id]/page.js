@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, User, Calendar, BookOpen } from 'lucide-react';
 import { api, getImageUrl } from '../../../hooks/useApi';
+import OptimizedImage from '../../../components/OptimizedImage';
+import useSEO from '../../../hooks/useSEO';
 
 export default function BlogDetails({ params }) {
   const router = useRouter();
@@ -16,6 +18,13 @@ export default function BlogDetails({ params }) {
     queryKey: ['blog', id],
     queryFn: () => api.getBlog(id),
     enabled: !!id
+  });
+
+  useSEO({
+    title: blog?.title || 'ব্লগ',
+    description: blog?.content?.slice(0, 160) || 'Travel & Global Employment Blog - MCES International',
+    ogImage: blog?.imageUrl,
+    canonicalPath: `/blogs/${id}`,
   });
 
   if (isLoading) {
@@ -52,10 +61,10 @@ export default function BlogDetails({ params }) {
       <article className="space-y-6">
         {/* Cover image */}
         <div className="h-[400px] w-full rounded-2xl overflow-hidden bg-slate-100 shadow-sm">
-          <img 
+          <OptimizedImage
             src={getImageUrl(blog.imageUrl)} 
             alt={blog.title}
-            className="w-full h-full object-cover"
+            containerClassName="w-full h-full"
           />
         </div>
 

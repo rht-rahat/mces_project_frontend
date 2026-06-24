@@ -6,8 +6,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../../hooks/useApi';
 import { Maximize2, X, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import Pagination from '../../components/Pagination';
+import OptimizedImage from '../../components/OptimizedImage';
+import useSEO from '../../hooks/useSEO';
 
 const Gallery = () => {
+  useSEO({
+    title: 'ফটো গ্যালারি',
+    description: 'MCES International Overseas Travel Agency এর ফটো গ্যালারি। আমাদের মেমোরিজ ও ইভেন্টের ছবি দেখুন।',
+    canonicalPath: '/gallery',
+  });
+
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [page, setPage] = useState(1);
   const perPage = 12;
@@ -80,7 +88,7 @@ const Gallery = () => {
                   isFeatured ? 'md:col-span-2 md:row-span-2 h-[340px] md:h-[460px]' : 'h-[220px]'
                 }`}
               >
-                <img src={item.imageUrl} alt={item.title} loading="lazy" className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" />
+                <OptimizedImage src={item.imageUrl} alt={item.title} containerClassName="w-full h-full" className="group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-5">
                   <div className="flex items-center justify-between text-white">
                     <h3 className="font-bold text-sm truncate">{item.title}</h3>
@@ -112,12 +120,12 @@ const Gallery = () => {
             className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           >
             {/* Close */}
-            <button onClick={() => setSelectedIndex(null)} className="absolute top-6 right-6 z-10 text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors">
+            <button onClick={() => setSelectedIndex(null)} className="absolute top-6 right-6 z-10 text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors" aria-label="Close lightbox">
               <X className="w-5 h-5" />
             </button>
 
             {/* Counter */}
-            <div className="absolute top-6 left-6 z-10 px-3 py-1.5 bg-white/10 text-white/80 text-xs font-semibold rounded-full">
+            <div className="absolute top-6 left-6 z-10 px-3 py-1.5 bg-white/10 text-white/80 text-xs font-semibold rounded-full" aria-live="polite">
               {selectedIndex + 1} / {images.length}
             </div>
 
@@ -125,6 +133,7 @@ const Gallery = () => {
             <button
               onClick={(e) => { e.stopPropagation(); handlePrev(); }}
               className="absolute left-4 md:left-8 z-10 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+              aria-label="Previous image"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
@@ -133,6 +142,7 @@ const Gallery = () => {
             <button
               onClick={(e) => { e.stopPropagation(); handleNext(); }}
               className="absolute right-4 md:right-8 z-10 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
+              aria-label="Next image"
             >
               <ChevronRight className="w-6 h-6" />
             </button>
@@ -147,7 +157,15 @@ const Gallery = () => {
               onClick={(e) => e.stopPropagation()}
               className="max-w-4xl w-full text-center"
             >
-              <img src={selectedImage.imageUrl} alt={selectedImage.title} className="max-h-[75vh] mx-auto rounded-xl object-contain shadow-2xl" />
+              <OptimizedImage
+                src={selectedImage.imageUrl}
+                alt={selectedImage.title}
+                fill={false}
+                width={800}
+                height={600}
+                containerClassName="max-h-[75vh] mx-auto"
+                className="rounded-xl shadow-2xl object-contain"
+              />
               <h2 className="text-white font-bold text-lg mt-4">{selectedImage.title}</h2>
               {selectedImage.description && <p className="text-slate-400 text-sm mt-1">{selectedImage.description}</p>}
             </motion.div>

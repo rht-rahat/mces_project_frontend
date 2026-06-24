@@ -6,11 +6,18 @@ import Link from 'next/navigation';
 import { Globe, Mail, Lock, User, ArrowRight } from 'lucide-react';
 import useStore from '../../store/useStore';
 import { API_BASE } from '../../hooks/useApi';
+import useSEO from '../../hooks/useSEO';
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setAuth, user } = useStore();
+
+  useSEO({
+    title: 'লগইন / রেজিস্টার',
+    description: 'MCES International Overseas Travel Agency - আপনার অ্যাকাউন্ট লগইন অথবা নতুন রেজিস্টার করুন।',
+    canonicalPath: '/login',
+  });
 
   const [activeTab, setActiveTab] = useState('login'); // 'login' or 'register'
   const [email, setEmail] = useState('');

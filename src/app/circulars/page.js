@@ -6,10 +6,18 @@ import { useQuery } from '@tanstack/react-query';
 import { Briefcase, MapPin, Globe, Users, ArrowLeft, Filter, BookOpen } from 'lucide-react';
 import { api, getImageUrl } from '../../hooks/useApi';
 import countries from '../../utils/countries';
+import OptimizedImage from '../../components/OptimizedImage';
+import useSEO from '../../hooks/useSEO';
 
 function CircularsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  useSEO({
+    title: 'বিদেশে দক্ষ শ্রমিক রিক্রুটমেন্ট সার্কুলার',
+    description: 'রোমানিয়া, জাপান ও মধ্যপ্রাচ্যে দক্ষ কর্মী নিয়োগের সর্বশেষ সার্কুলার দেখুন। নিরাপদ ও নির্ভরযোগ্য ক্যারিয়ার গড়তে ইউরোপ ও এশিয়ার বিভিন্ন দেশের নতুন সার্কুলার।',
+    canonicalPath: '/circulars',
+  });
 
   // Filters state
   const [country, setCountry] = useState(searchParams.get('country') || '');
@@ -33,10 +41,10 @@ function CircularsContent() {
           <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
             {/* Image Header */}
             <div className="relative h-48 md:h-56 w-full bg-slate-100 overflow-hidden rounded-t-3xl">
-              <img 
+              <OptimizedImage
                 src={getImageUrl(selectedCirc.imageUrl)} 
                 alt={selectedCirc.title}
-                className="w-full h-full object-cover"
+                containerClassName="w-full h-full"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
               <button 
@@ -146,6 +154,7 @@ function CircularsContent() {
             value={country}
             onChange={(e) => setCountry(e.target.value)}
             className="px-4 py-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 bg-white min-w-[170px] transition-all"
+            aria-label="Country filter"
           >
             <option value="">সকল দেশ</option>
             {countries.map(c => <option key={c} value={c}>{c}</option>)}
@@ -155,6 +164,7 @@ function CircularsContent() {
             value={jobCategory}
             onChange={(e) => setJobCategory(e.target.value)}
             className="px-4 py-2.5 border border-slate-200 rounded-xl text-xs md:text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 bg-white min-w-[170px] transition-all"
+            aria-label="Job category filter"
           >
             <option value="">সকল ক্যাটাগরি</option>
             {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
@@ -175,10 +185,11 @@ function CircularsContent() {
               className="group bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:border-teal-200 transition-all duration-300 flex flex-col"
             >
               <div className="relative h-52 md:h-60 w-full bg-slate-100 overflow-hidden">
-                <img
+                <OptimizedImage
                   src={getImageUrl(circ.imageUrl)}
                   alt={circ.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  containerClassName="w-full h-full"
+                  className="group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                 <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">

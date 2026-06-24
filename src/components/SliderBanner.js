@@ -35,8 +35,20 @@ export default function SliderBanner() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0); // -1 for left, 1 for right
+  const [imagesLoaded, setImagesLoaded] = useState({});
 
   const activeSliders = sliders.length > 0 ? sliders : SEEDED_FALLBACK;
+
+  // Preload next slide image for smoother transitions
+  useEffect(() => {
+    const nextIndex = (currentIndex + 1) % activeSliders.length;
+    const nextUrl = getImageUrl(activeSliders[nextIndex]?.imageUrl);
+    if (nextUrl && !imagesLoaded[nextUrl]) {
+      const img = new Image();
+      img.src = nextUrl;
+      img.onload = () => setImagesLoaded(prev => ({ ...prev, [nextUrl]: true }));
+    }
+  }, [currentIndex, activeSliders, imagesLoaded]);
 
   useEffect(() => {
     if (activeSliders.length <= 1) return;
@@ -171,12 +183,14 @@ export default function SliderBanner() {
           <button
             onClick={handlePrev}
             className="absolute left-4 top-1/2 -translate-y-1/2 z-35 p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all backdrop-blur-sm focus:outline-none"
+            aria-label="Previous slide"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={handleNext}
             className="absolute right-4 top-1/2 -translate-y-1/2 z-35 p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all backdrop-blur-sm focus:outline-none"
+            aria-label="Next slide"
           >
             <ChevronRight className="w-5 h-5" />
           </button>

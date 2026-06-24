@@ -55,6 +55,7 @@ import { api, API_BASE, getImageUrl } from "../../hooks/useApi";
 import useStore from "../../store/useStore";
 import { showToast, confirmDelete } from "../../utils/swal";
 import Pagination from "../../components/Pagination";
+import OptimizedImage from "../../components/OptimizedImage";
 import countries from "../../utils/countries";
 import Link from "next/link";
 
@@ -95,6 +96,8 @@ export default function AdminDashboard() {
   const [isSubmittingBlog, setIsSubmittingBlog] = useState(false);
   const [isSubmittingGallery, setIsSubmittingGallery] = useState(false);
   const [isSubmittingPassport, setIsSubmittingPassport] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showChatList, setShowChatList] = useState(false);
 
   // Search passport state
   const [passportSearch, setPassportSearch] = useState("");
@@ -927,8 +930,16 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row text-slate-800">
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between border-r border-slate-800">
+      <aside className={`fixed md:sticky top-0 left-0 z-50 h-screen w-72 md:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between border-r border-slate-800 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div>
           {/* Logo */}
           <div className="p-6 border-b border-slate-800 flex items-center justify-between">
@@ -981,7 +992,7 @@ export default function AdminDashboard() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
                   className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
                     activeTab === item.id
                       ? "bg-teal-700 text-white shadow-sm"
@@ -1013,19 +1024,28 @@ export default function AdminDashboard() {
       {/* Main Panel Content */}
       <main className="flex-grow flex flex-col min-h-screen overflow-x-hidden">
         {/* Header toolbar */}
-        <header className="bg-white border-b border-slate-200 h-16 px-6 flex items-center justify-between sticky top-0 z-30">
-          <h2 className="text-base font-bold text-slate-800 uppercase tracking-wider">
-            {activeTab === "overview" && "ড্যাশবোর্ড এনালিটিক্স ওভারভিউ"}
-            {activeTab === "passports" && "জমাকৃত পাসপোর্ট ও ফাইল তালিকা"}
-            {activeTab === "chat" && "গ্রাহকদের চ্যাট ও সমাধান বোর্ড"}
-            {activeTab === "sliders" && "স্লাইডার ব্যানার ম্যানেজমেন্ট"}
-            {activeTab === "circulars" && "চাকরির সার্কুলার তালিকা"}
-            {activeTab === "packages" && "ট্যুর প্যাকেজ তালিকা"}
-            {activeTab === "blogs" && "ব্লগ ও ইনফরমেশন প্যানেল"}
-            {activeTab === "reviews" && "গ্রাহক রিভিউ প্যানেল"}
-            {activeTab === "appointment" && "Appointment Panel"}
-            {activeTab === "gallery" && "ফটো গ্যালারি ম্যানেজমেন্ট"}
-          </h2>
+        <header className="bg-white border-b border-slate-200 h-16 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 text-slate-500 hover:text-teal-700 hover:bg-slate-100 rounded-lg transition-colors md:hidden focus:outline-none"
+              aria-label="Open sidebar"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h2 className="text-sm md:text-base font-bold text-slate-800 uppercase tracking-wider truncate max-w-[180px] md:max-w-none">
+              {activeTab === "overview" && "ড্যাশবোর্ড এনালিটিক্স ওভারভিউ"}
+              {activeTab === "passports" && "জমাকৃত পাসপোর্ট ও ফাইল তালিকা"}
+              {activeTab === "chat" && (showChatList ? "চ্যাট কনভার্সেশনস তালিকা" : "গ্রাহকদের চ্যাট ও সমাধান বোর্ড")}
+              {activeTab === "sliders" && "স্লাইডার ব্যানার ম্যানেজমেন্ট"}
+              {activeTab === "circulars" && "চাকরির সার্কুলার তালিকা"}
+              {activeTab === "packages" && "ট্যুর প্যাকেজ তালিকা"}
+              {activeTab === "blogs" && "ব্লগ ও ইনফরমেশন প্যানেল"}
+              {activeTab === "reviews" && "গ্রাহক রিভিউ প্যানেল"}
+              {activeTab === "appointment" && "Appointment Panel"}
+              {activeTab === "gallery" && "ফটো গ্যালারি ম্যানেজমেন্ট"}
+            </h2>
+          </div>
 
           {/* Right Bell notification stream */}
           <div className="flex items-center space-x-4">
@@ -1471,11 +1491,12 @@ export default function AdminDashboard() {
 
           {/* TAB 3: LIVE CHAT SUPPORT CONSOLE */}
           {activeTab === "chat" && (
-            <div className="bg-white rounded-2xl border border-teal-50 shadow-sm overflow-hidden h-[600px] flex">
+            <div className="bg-white rounded-2xl border border-teal-50 shadow-sm overflow-hidden h-[calc(100vh-12rem)] md:h-[600px] flex relative">
               {/* Left Column: User threads list */}
-              <div className="w-80 border-r border-slate-200 flex flex-col">
-                <div className="p-4 border-b border-slate-100 bg-slate-50 font-bold text-slate-700 text-xs md:text-sm">
-                  চ্যাট কনভার্সেশনস তালিকা
+              <div className={`w-full md:w-80 border-r border-slate-200 flex flex-col absolute md:relative inset-0 z-10 bg-white md:bg-transparent transition-transform duration-300 ${activeThread && !showChatList ? '-translate-x-full md:translate-x-0' : 'translate-x-0'}`}>
+                <div className="p-4 border-b border-slate-100 bg-slate-50 font-bold text-slate-700 text-xs md:text-sm flex items-center justify-between">
+                  <span>চ্যাট কনভার্সেশনস তালিকা</span>
+                  <span className="text-[10px] text-slate-400 font-normal">({threads.length})</span>
                 </div>
                 <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
                   {threads.length === 0 ? (
@@ -1488,7 +1509,7 @@ export default function AdminDashboard() {
                       return (
                         <div
                           key={thread.userId}
-                          onClick={() => setActiveThread(thread)}
+                          onClick={() => { setActiveThread(thread); setShowChatList(false); }}
                           className={`p-4 cursor-pointer transition-colors ${isActive ? "bg-teal-50/50 border-r-4 border-teal-700" : "hover:bg-slate-50"}`}
                         >
                           <div className="flex justify-between items-baseline mb-1">
@@ -1513,12 +1534,19 @@ export default function AdminDashboard() {
               </div>
 
               {/* Right Column: Chat History & Reply */}
-              <div className="flex-1 flex flex-col bg-slate-50 justify-between">
+              <div className={`flex-1 flex flex-col bg-slate-50 justify-between w-full md:w-auto ${!activeThread ? 'hidden md:flex' : 'flex'}`}>
                 {activeThread ? (
                   <>
                     {/* Header */}
                     <div className="bg-white border-b border-slate-200 p-4 flex items-center justify-between">
                       <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => { setActiveThread(null); setShowChatList(true); }}
+                          className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 md:hidden"
+                          aria-label="Back to conversations"
+                        >
+                          <ArrowLeft className="w-4 h-4" />
+                        </button>
                         <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
                         <h4 className="font-bold text-slate-800 text-sm md:text-base">
                           {activeThread.senderName} এর সাথে চ্যাট
@@ -1540,7 +1568,7 @@ export default function AdminDashboard() {
                                 {isAdmin ? "অ্যাডমিন সাপোর্ট" : msg.senderName}
                               </span>
                               <div
-                                className={`max-w-[70%] px-3.5 py-2.5 text-xs rounded-2xl shadow-sm ${
+                                className={`max-w-[85%] md:max-w-[70%] px-3.5 py-2.5 text-xs rounded-2xl shadow-sm ${
                                   isAdmin
                                     ? "bg-teal-700 text-white rounded-tr-none"
                                     : "bg-white text-slate-800 rounded-tl-none border border-slate-100"
@@ -1552,8 +1580,8 @@ export default function AdminDashboard() {
                           );
                         })
                       ) : (
-                        <div className="text-center text-xs text-slate-400 py-4">
-                          কোনো মেসেজ পাওয়া যায়নি বা লোড হচ্ছে...
+                        <div className="text-center text-xs text-slate-400 py-8">
+                          {isLoading ? 'মেসেজ লোড হচ্ছে...' : 'কোনো মেসেজ পাওয়া যায়নি।'}
                         </div>
                       )}
                       <div ref={chatEndRef} />
@@ -1582,10 +1610,10 @@ export default function AdminDashboard() {
                     </form>
                   </>
                 ) : (
-                  <div className="m-auto text-slate-400 text-xs md:text-sm flex flex-col items-center space-y-2">
+                  <div className="m-auto text-slate-400 text-xs md:text-sm flex flex-col items-center space-y-2 p-6 text-center">
                     <MessageSquare className="w-10 h-10 text-slate-350" />
                     <span>
-                      চ্যাট শুরু করতে বাম পাশের তালিকায় গ্রাহক নির্বাচন করুন।
+                      বাম পাশের তালিকা থেকে একজন গ্রাহক নির্বাচন করুন।
                     </span>
                   </div>
                 )}

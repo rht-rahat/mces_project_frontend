@@ -69,6 +69,28 @@ body {
   background: #115e59;
 }
 
+/* Image optimization */
+img {
+  content-visibility: auto;
+}
+
+/* Smooth image loading transition */
+@keyframes imageFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+img[loading="lazy"] {
+  animation: imageFadeIn 0.4s ease-in;
+}
+
+/* High-DPI rendering */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img {
+    image-rendering: auto;
+  }
+}
+
 /* Curve Divider Background Shapes */
 .wave-bg {
   position: relative;

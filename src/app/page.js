@@ -27,8 +27,15 @@ import { api, getImageUrl } from "../hooks/useApi";
 import SliderBanner from "../components/SliderBanner";
 import { showToast } from "../utils/swal";
 import Pagination from "../components/Pagination";
+import OptimizedImage from "../components/OptimizedImage";
+import useSEO from "../hooks/useSEO";
 
 export default function Home() {
+  useSEO({
+    title: 'MCES INTERNATIONAL OVERSEAS TRAVEL AGENCY',
+    description: 'দক্ষ শ্রমিক পাঠানো, বিদেশের বিশ্ববিদ্যালয়ে উচ্চশিক্ষা ভর্তি, নেপাল-শ্রীলঙ্কা ট্যুর প্যাকেজ ও পাসপোর্ট ট্র্যাকিং সুবিধা সংবলিত বিশ্বস্ত প্ল্যাটফর্ম।',
+    canonicalPath: '/',
+  });
   // 1. Fetching dynamic items
   const { data: packages = [] } = useQuery({
     queryKey: ["packages"],
@@ -465,10 +472,11 @@ export default function Home() {
             >
               {/* Package Image */}
               <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
-                <img
+                <OptimizedImage
                   src={getImageUrl(pkg.imageUrl)}
                   alt={pkg.title}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                  containerClassName="w-full h-full"
+                  className="transition-transform duration-500 hover:scale-105"
                 />
                 <span className="absolute top-3 right-3 px-3 py-1 bg-teal-700 text-white text-[10px] font-bold rounded-full shadow-sm">
                   {pkg.destination}
@@ -550,10 +558,10 @@ export default function Home() {
                 >
                   {/* Circular image */}
                   <div className="w-full md:w-36 h-28 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0">
-                    <img
+                    <OptimizedImage
                       src={getImageUrl(circ.imageUrl)}
                       alt={circ.title}
-                      className="w-full h-full object-cover"
+                      containerClassName="w-full h-full"
                     />
                   </div>
 
@@ -715,10 +723,11 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                <label htmlFor="appointment-department" className="block text-xs font-semibold text-slate-600 mb-1.5">
                   ডিপার্টমেন্ট নির্বাচন করুন
                 </label>
                 <select
+                  id="appointment-department"
                   value={appointmentService}
                   onChange={(e) => setAppointmentService(e.target.value)}
                   className="w-full px-4 py-2 text-xs border border-slate-200 curvy-input focus:outline-none focus:border-teal-700 bg-white"
@@ -822,10 +831,10 @@ export default function Home() {
               className="bg-white rounded-2xl overflow-hidden border border-teal-50 shadow-sm flex flex-col md:flex-row hover:shadow-md transition-shadow"
             >
               <div className="w-full md:w-48 h-40 bg-slate-100 flex-shrink-0">
-                <img
+                <OptimizedImage
                   src={getImageUrl(post.imageUrl)}
                   alt={post.title}
-                  className="w-full h-full object-cover"
+                  containerClassName="w-full h-full"
                 />
               </div>
               <div className="p-6 flex flex-col justify-between">
@@ -981,6 +990,7 @@ export default function Home() {
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="absolute inset-0"
+                title="MCES International Office Location - Liton Khan Shopping Center, Narsingdi, Dhaka"
               ></iframe>
               {/* <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3652.128795551939!2d90.3888636154316!3d23.751688594247547!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8a5369c0d4f%3A0xe5a363a032dfa9a3!2sPanthapath%20Signal!5e0!3m2!1sen!2sbd!4v1655000000000!5m2!1sen!2sbd"
@@ -1053,6 +1063,7 @@ function ReviewSlider({ reviews, getImageUrl }) {
       <button
         onClick={goPrev}
         className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 p-2.5 bg-white border border-slate-200 hover:bg-teal-50 hover:text-teal-700 rounded-full shadow-sm transition-colors"
+        aria-label="Previous review"
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
@@ -1061,6 +1072,7 @@ function ReviewSlider({ reviews, getImageUrl }) {
       <button
         onClick={goNext}
         className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 p-2.5 bg-white border border-slate-200 hover:bg-teal-50 hover:text-teal-700 rounded-full shadow-sm transition-colors"
+        aria-label="Next review"
       >
         <ChevronRight className="w-5 h-5" />
       </button>
@@ -1090,11 +1102,12 @@ function ReviewSlider({ reviews, getImageUrl }) {
               &ldquo;{rev.reviewText}&rdquo;
             </p>
             <div className="flex items-center space-x-4 pt-5 border-t border-slate-100">
-              <img
-                src={getImageUrl(rev.imageUrl)}
-                alt={rev.clientName}
-                className="w-12 h-12 rounded-full object-cover border-2 border-teal-100"
-              />
+                <OptimizedImage
+                  src={getImageUrl(rev.imageUrl)}
+                  alt={rev.clientName}
+                  containerClassName="w-12 h-12 rounded-full shrink-0"
+                  className="rounded-full border-2 border-teal-100"
+                />
               <div>
                 <h4 className="font-bold text-slate-800 text-sm">
                   {rev.clientName}

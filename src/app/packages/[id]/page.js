@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Clock, MapPin, Tag, CheckCircle, Calendar } from 'lucide-react';
 import { api, getImageUrl } from '../../../hooks/useApi';
+import OptimizedImage from '../../../components/OptimizedImage';
+import useSEO from '../../../hooks/useSEO';
 
 export default function PackageDetails({ params }) {
   const router = useRouter();
@@ -18,6 +20,13 @@ export default function PackageDetails({ params }) {
     queryKey: ['package', id],
     queryFn: () => api.getPackage(id),
     enabled: !!id
+  });
+
+  useSEO({
+    title: pkg?.title || 'ট্যুর প্যাকেজ',
+    description: pkg?.description?.slice(0, 160) || 'Explore the best tour packages from MCES International.',
+    ogImage: pkg?.imageUrl,
+    canonicalPath: `/packages/${id}`,
   });
 
   if (isLoading) {
@@ -57,10 +66,10 @@ export default function PackageDetails({ params }) {
         {/* Left Column: Image and Details */}
         <div className="lg:col-span-2 space-y-8">
           <div className="h-96 w-full rounded-2xl overflow-hidden bg-slate-100 shadow-sm">
-            <img 
+            <OptimizedImage
               src={getImageUrl(pkg.imageUrl)} 
               alt={pkg.title}
-              className="w-full h-full object-cover"
+              containerClassName="w-full h-full"
             />
           </div>
 
