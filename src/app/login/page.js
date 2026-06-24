@@ -183,9 +183,9 @@ function LoginContent() {
           </button>
         </form>
 
-        <div className="mt-6 text-center text-[10px] text-slate-400">
+        {/* <div className="mt-6 text-center text-[10px] text-slate-400">
           <p>অ্যাডমিন প্যানেল এক্সেস করতে ইমেইল: <span className="font-bold text-slate-600">admin@mces.com</span> পাসওয়ার্ড: <span className="font-bold text-slate-600">admin</span> দিন।</p>
-        </div>
+        </div> */}
 
       </div>
     </div>
