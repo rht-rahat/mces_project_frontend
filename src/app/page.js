@@ -846,7 +846,7 @@ export default function Home() {
                     {post.title}
                   </h3>
                   <p className="text-slate-500 text-xs mt-2 line-clamp-2 leading-relaxed">
-                    {post.content}
+                    {post.content?.replace(/<[^>]*>/g, '')}
                   </p>
                 </div>
                 <Link

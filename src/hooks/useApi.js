@@ -108,6 +108,11 @@ export const api = {
     headers: getHeaders(token),
     body: formData
   }),
+  updateBlog: (id, formData, token) => apiCall(`${API_BASE}/blogs/${id}`, {
+    method: 'PUT',
+    headers: getHeaders(token),
+    body: formData
+  }),
   deleteBlog: (id, token) => apiCall(`${API_BASE}/blogs/${id}`, {
     method: 'DELETE',
     headers: getHeaders(token)

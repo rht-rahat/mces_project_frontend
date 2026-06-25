@@ -57,6 +57,7 @@ import useStore from "../../store/useStore";
 import { showToast, confirmDelete } from "../../utils/swal";
 import Pagination from "../../components/Pagination";
 import OptimizedImage from "../../components/OptimizedImage";
+import JoditEditor from "../../components/JoditEditor";
 import countries from "../../utils/countries";
 import Link from "next/link";
 
@@ -653,6 +654,10 @@ export default function AdminDashboard() {
 
   const handleBlogSubmit = async (e) => {
     e.preventDefault();
+    if (!blogTitle.trim())
+      return showToast('warning', "ব্লগ শিরোনাম লিখুন।");
+    if (!blogContent || blogContent === "<br>" || blogContent.replace(/<[^>]*>/g, '').trim() === "")
+      return showToast('warning', "ব্লগ কনটেন্ট লিখুন।");
     if (!blogImageFile && !editingId)
       return showToast('warning', "ব্লগ ফিচার্ড ছবি আপলোড করা আবশ্যক।");
     setIsSubmittingBlog(true);
@@ -665,8 +670,13 @@ export default function AdminDashboard() {
     }
 
     try {
-      await api.addBlog(formData, token);
-      showToast('success', "ব্লগ যুক্ত করা হয়েছে।");
+      if (editingId) {
+        await api.updateBlog(editingId, formData, token);
+        showToast('success', "ব্লগ আপডেট করা হয়েছে।");
+      } else {
+        await api.addBlog(formData, token);
+        showToast('success', "ব্লগ যুক্ত করা হয়েছে।");
+      }
       refetchBlogs();
       closeModal();
     } catch (err) {
@@ -827,6 +837,10 @@ export default function AdminDashboard() {
     } else if (type === "gallery") {
       setGalleryTitle(item.title);
       setGalleryDescription(item.description || "");
+    } else if (type === "blog") {
+      setBlogTitle(item.title || "");
+      setBlogContent(item.content || "");
+      setBlogAuthor(item.author || "Admin");
     }
   };
 
@@ -1845,10 +1859,16 @@ export default function AdminDashboard() {
                         {item.title}
                       </h4>
                       <p className="text-slate-450 text-[10px] line-clamp-2">
-                        {item.content}
+                        {item.content?.replace(/<[^>]*>/g, '')}
                       </p>
                     </div>
-                    <div className="p-3 bg-slate-50 border-t border-slate-100 flex justify-end">
+                    <div className="p-3 bg-slate-50 border-t border-slate-100 flex justify-end space-x-2">
+                      <button
+                        onClick={() => openEditModal("blog", item)}
+                        className="p-1.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-650 shadow-sm"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </button>
                       <button
                         onClick={() =>
                           handleDeleteItem("blog", item._id || item.id)
@@ -2001,7 +2021,7 @@ export default function AdminDashboard() {
       {/* CRUD MODAL FOR ADDING/EDITING DATA */}
       {isCrudModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 relative animate-in zoom-in-95 duration-200 text-slate-800 shadow-2xl">
+          <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 relative animate-in zoom-in-95 duration-200 text-slate-800 shadow-2xl">
             <button
               onClick={closeModal}
               className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-650 hover:bg-slate-50 rounded-full"
@@ -2426,13 +2446,7 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-semibold text-slate-600 mb-1">
                     ব্লগ কনটেন্ট *
                   </label>
-                  <textarea
-                    required
-                    value={blogContent}
-                    onChange={(e) => setBlogContent(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-xl text-xs focus:outline-none focus:border-teal-700 bg-slate-50"
-                    rows="5"
-                  />
+                  <JoditEditor value={blogContent} onChange={setBlogContent} />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">

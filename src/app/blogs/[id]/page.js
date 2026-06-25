@@ -22,7 +22,7 @@ export default function BlogDetails({ params }) {
 
   useSEO({
     title: blog?.title || 'ব্লগ',
-    description: blog?.content?.slice(0, 160) || 'Travel & Global Employment Blog - MCES International',
+    description: blog?.content?.replace(/<[^>]*>/g, '').slice(0, 160) || 'Travel & Global Employment Blog - MCES International',
     ogImage: blog?.imageUrl,
     canonicalPath: `/blogs/${id}`,
   });
@@ -91,9 +91,10 @@ export default function BlogDetails({ params }) {
         <div className="h-0.5 w-16 bg-teal-700 rounded-full" />
 
         {/* Content */}
-        <p className="text-slate-650 text-xs md:text-sm leading-relaxed whitespace-pre-line pt-4 font-light">
-          {blog.content}
-        </p>
+        <div
+          className="text-slate-650 text-xs md:text-sm leading-relaxed pt-4 font-light blog-content"
+          dangerouslySetInnerHTML={{ __html: blog.content }}
+        />
 
       </article>
     </div>
